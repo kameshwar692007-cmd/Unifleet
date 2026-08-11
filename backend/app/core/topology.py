@@ -11,9 +11,14 @@ class Node:
         self.is_charging = is_charging
         self.is_constrained = is_constrained
 
+    @property
+    def id(self) -> str:
+        return self.node_id
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "node_id": self.node_id,
+            "id": self.node_id,
             "name": self.name,
             "zone": self.zone,
             "x": self.x,
@@ -72,7 +77,7 @@ class WarehouseTopology:
             ("N03", "N04"),
             ("N01", "N10"),
             ("N02", "N05"),
-            ("N03", "N11", True), # Constrained bottleneck junction
+            ("N03", "N11", True),
             ("N04", "N12"),
             ("N05", "N06"),
             ("N06", "N07"),

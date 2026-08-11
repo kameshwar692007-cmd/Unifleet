@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from app.core.fleet_brain import fleet_brain
 from app.mqtt.client import mqtt_manager
+from simulator.engine import simulator_engine
 
 router = APIRouter(prefix="/demo", tags=["Judge Demo Controller"])
 
@@ -26,7 +27,6 @@ def execute_act3():
 @router.post("/act4")
 def execute_act4():
     """Act 4: HERO MOMENT - Route Conflict Prediction & Resolution at N11 Central Junction"""
-    # Create two conflicting jobs whose routes cross N11 Central Junction simultaneously
     job1 = fleet_brain.create_job("N03", "N06", requested_robot_id="R01")
     job2 = fleet_brain.create_job("N05", "N03", requested_robot_id="R04")
 
@@ -63,7 +63,16 @@ def execute_act6():
     adapters_info = [
         {"vendor": "Vendor Alpha", "protocol": "JSON over MQTT", "robot": "R01 / R02", "schema": "unit, battery_pct, pos[x,y], mode"},
         {"vendor": "Vendor Beta", "protocol": "JSON over MQTT", "robot": "R03", "schema": "robotId, soc, coordinates{x,y}, state"},
-        {"vendor": "Vendor Gamma", "protocol": "JSON over MQTT", "robot": "R04 / R05", "schema": "dev_id, b_lvl, location{node_id, px, py}, op_state"}
+        {"vendor": "Vendor Gamma", "protocol": "JSON over MQTT", "robot": "R04 / R05", "schema": "dev_id, b_lvl, location{node_id, px, py}, op_state"},
+        {"vendor": "Vendor Delta", "protocol": "JSON over MQTT", "robot": "Dynamic Plug-and-Play", "schema": "device_guid, charge_percent, geo_point[x,y], system_mode"}
     ]
     fleet_brain.log_event("demo.act6", "INFO", "Judge Demo Act 6 Executed: Open Architecture Vendor Adapters demonstrated.")
     return {"status": "SUCCESS", "act": 6, "adapters": adapters_info}
+
+@router.post("/reset")
+def reset_demo():
+    """Resets the entire UniFleet demo state (robots, jobs, routes, conflicts) cleanly for repeated judge testing."""
+    fleet_brain.reset_fleet()
+    simulator_engine.reset()
+    mqtt_manager.publish_command("global", "RESET")
+    return {"status": "SUCCESS", "message": "UniFleet demo state successfully reset to initial starting state."}

@@ -22,5 +22,6 @@ export const api = {
   compareRoutes: (source_node, target_node) => 
     axios.get(`${API_BASE}/intelligence/compare-routes`, { params: { source_node, target_node } }),
 
-  triggerDemoAct: (actNumber) => axios.post(`${API_BASE}/demo/act${actNumber}`)
+  triggerDemoAct: (actNumber) => axios.post(`${API_BASE}/demo/act${actNumber}`),
+  resetDemo: () => axios.post(`${API_BASE}/demo/reset`)
 };

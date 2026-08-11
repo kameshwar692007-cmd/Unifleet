@@ -10,18 +10,33 @@ from app.mqtt.client import mqtt_manager
 logger = logging.getLogger("unifleet.fleet_brain")
 
 class RobotState:
-    def __init__(self, robot_id: str, vendor: str, model_type: str):
+    def __init__(self, robot_id: str, vendor: str, model_type: str, start_node: str = "N01"):
         self.robot_id = robot_id
         self.vendor = vendor
         self.model_type = model_type
+        self.start_node = start_node
         self.battery = 100.0
         self.status = "AVAILABLE"
-        self.x = 0.0
-        self.y = 0.0
-        self.current_node = "N01"
+        node_obj = topology.get_node(start_node)
+        self.x = node_obj.x if node_obj else 0.0
+        self.y = node_obj.y if node_obj else 0.0
+        self.current_node = start_node
         self.target_node: Optional[str] = None
         self.current_job_id: Optional[str] = None
         self.route: List[str] = []
+        self.marked_unavailable = False
+        self.last_seen = datetime.now(timezone.utc)
+
+    def reset(self):
+        self.battery = 100.0
+        self.status = "AVAILABLE"
+        node_obj = topology.get_node(self.start_node)
+        self.x = node_obj.x if node_obj else 0.0
+        self.y = node_obj.y if node_obj else 0.0
+        self.current_node = self.start_node
+        self.target_node = None
+        self.current_job_id = None
+        self.route = []
         self.marked_unavailable = False
         self.last_seen = datetime.now(timezone.utc)
 
@@ -45,16 +60,25 @@ class RobotState:
 class FleetBrain:
     def __init__(self):
         self.robots: Dict[str, RobotState] = {
-            "R01": RobotState("R01", "Vendor Alpha", "Heavy Lifter AGV"),
-            "R02": RobotState("R02", "Vendor Alpha", "Heavy Lifter AGV"),
-            "R03": RobotState("R03", "Vendor Beta", "AGV Picker Unit"),
-            "R04": RobotState("R04", "Vendor Gamma", "AMR Tugger"),
-            "R05": RobotState("R05", "Vendor Gamma", "AMR Tugger")
+            "R01": RobotState("R01", "Vendor Alpha", "Heavy Lifter AGV", start_node="N01"),
+            "R02": RobotState("R02", "Vendor Alpha", "Heavy Lifter AGV", start_node="N02"),
+            "R03": RobotState("R03", "Vendor Beta", "AGV Picker Unit", start_node="N03"),
+            "R04": RobotState("R04", "Vendor Gamma", "AMR Tugger", start_node="N04"),
+            "R05": RobotState("R05", "Vendor Gamma", "AMR Tugger", start_node="N05")
         }
         self.jobs: Dict[str, Dict[str, Any]] = {}
         self.event_logs: List[Dict[str, Any]] = []
         self.alerts: List[Dict[str, Any]] = []
         self.conflict_records: List[Dict[str, Any]] = []
+
+    def reset_fleet(self):
+        for robot in self.robots.values():
+            robot.reset()
+        self.jobs.clear()
+        self.event_logs.clear()
+        self.alerts.clear()
+        self.conflict_records.clear()
+        self.log_event("system.reset", "INFO", "Fleet Brain state reset to default judge state.")
 
     def update_normalized_telemetry(self, data: Dict[str, Any]):
         r_id = data.get("robot_id")
@@ -76,6 +100,8 @@ class FleetBrain:
                 job["status"] = "COMPLETED"
                 job["completed_at"] = datetime.now(timezone.utc).isoformat()
                 robot.current_job_id = None
+                robot.target_node = None
+                robot.route = []
                 self.log_event("job.completed", "SUCCESS", f"Job {job['id']} completed by robot {robot.robot_id}", {"job_id": job["id"], "robot_id": robot.robot_id})
 
     def log_event(self, event_type: str, severity: str, message: str, details: Optional[Dict[str, Any]] = None, robot_id: Optional[str] = None):
@@ -219,7 +245,12 @@ class FleetBrain:
             full_route = path1 + (path2[1:] if path2 and path1 else path2)
 
             robot.route = full_route
-            robot.target_node = full_route[0] if full_route else target_node
+            if len(full_route) > 1:
+                robot.target_node = full_route[1]
+            elif full_route:
+                robot.target_node = full_route[0]
+            else:
+                robot.target_node = target_node
 
             # Send command to simulator via MQTT
             mqtt_manager.publish_command(assigned_robot_id, "ASSIGN_ROUTE", {
@@ -255,5 +286,4 @@ class FleetBrain:
         return {"success": True, "robot": robot.to_dict()}
 
 fleet_brain = FleetBrain()
-# Register telemetry handler
 mqtt_manager.register_telemetry_callback(fleet_brain.update_normalized_telemetry)

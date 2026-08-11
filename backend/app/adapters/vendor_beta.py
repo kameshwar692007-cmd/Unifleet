@@ -7,13 +7,26 @@ class VendorBetaAdapter(BaseRobotAdapter):
         return "Vendor Beta"
 
     def normalize_telemetry(self, raw_payload: Dict[str, Any]) -> Dict[str, Any]:
-        robot_id = str(raw_payload.get("robotId", "R03"))
-        soc = float(raw_payload.get("soc", 1.0))
-        battery = soc * 100.0 if soc <= 1.0 else soc
+        if not isinstance(raw_payload, dict):
+            raw_payload = {}
 
-        coords = raw_payload.get("coordinates", {})
-        x = float(coords.get("x", 0.0))
-        y = float(coords.get("y", 0.0))
+        robot_id = str(raw_payload.get("robotId", "R03"))
+        
+        try:
+            soc = float(raw_payload.get("soc", 1.0))
+            battery = soc * 100.0 if soc <= 1.0 else soc
+        except (ValueError, TypeError):
+            battery = 100.0
+        battery = max(0.0, min(100.0, battery))
+
+        coords = raw_payload.get("coordinates")
+        x, y = 0.0, 0.0
+        if isinstance(coords, dict):
+            try:
+                x = float(coords.get("x", 0.0))
+                y = float(coords.get("y", 0.0))
+            except (ValueError, TypeError):
+                x, y = 0.0, 0.0
 
         raw_state = str(raw_payload.get("state", "AVAILABLE")).upper()
         state_map = {
@@ -35,7 +48,7 @@ class VendorBetaAdapter(BaseRobotAdapter):
             "status": status,
             "x": round(x, 2),
             "y": round(y, 2),
-            "current_node": raw_payload.get("current_node", "N01"),
+            "current_node": str(raw_payload.get("current_node", "N01")),
             "raw_payload": raw_payload
         }
 

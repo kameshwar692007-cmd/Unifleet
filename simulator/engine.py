@@ -2,9 +2,10 @@ import asyncio
 import json
 import logging
 import paho.mqtt.client as mqtt
-from typing import Dict
+from typing import Dict, Optional
 from simulator.robots import SimulatedRobot
 from app.config import settings
+from app.core.topology import topology
 
 logger = logging.getLogger("unifleet.simulator")
 
@@ -20,17 +21,38 @@ class SimulatorEngine:
         self.mqtt_client: Optional[mqtt.Client] = None
         self.is_running = False
 
+    def reset(self):
+        for r_id, robot in self.robots.items():
+            robot.route = []
+            robot.target_node = None
+            robot.battery = 100.0
+            robot.status = "AVAILABLE"
+            robot.is_manual_paused = False
+            robot.marked_unavailable = False
+            robot.current_job_id = None
+            node_obj = topology.get_node(robot.start_node if hasattr(robot, "start_node") else "N01")
+            if node_obj:
+                robot.x = node_obj.x
+                robot.y = node_obj.y
+                robot.current_node = node_obj.id
+        logger.info("Simulator state reset to default starting positions.")
+
     def on_connect(self, client, userdata, flags, rc, properties=None):
         logger.info(f"Simulator connected to MQTT broker with result code {rc}")
-        # Subscribe to command topics
         for r_id in self.robots:
             client.subscribe(f"unifleet/commands/{r_id}")
+        client.subscribe("unifleet/commands/global")
 
     def on_message(self, client, userdata, msg):
         try:
             topic = msg.topic
             payload = json.loads(msg.payload.decode("utf-8"))
             robot_id = topic.split("/")[-1]
+            
+            if robot_id == "global" or payload.get("command") == "RESET":
+                self.reset()
+                return
+
             robot = self.robots.get(robot_id)
             if not robot:
                 return
@@ -97,7 +119,6 @@ class SimulatorEngine:
                 robot.tick(dt)
                 raw_payload = robot.to_vendor_payload()
 
-                # Publish vendor payload to topic
                 vendor_key = robot.vendor.lower().replace(" ", "_")
                 topic = f"unifleet/telemetry/{vendor_key}/{robot.robot_id}"
 

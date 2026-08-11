@@ -13,6 +13,7 @@ class MQTTManager:
         self.client: Optional[mqtt.Client] = None
         self.telemetry_callbacks: list = []
         self.is_connected = False
+        self.loop: Optional[asyncio.AbstractEventLoop] = None
 
     def register_telemetry_callback(self, callback: Callable[[Dict[str, Any]], None]):
         self.telemetry_callbacks.append(callback)
@@ -30,10 +31,13 @@ class MQTTManager:
             # Pass through vendor adapter
             normalized = adapter_factory.detect_and_normalize(topic, payload)
 
-            # Invoke registered callbacks
+            # Invoke registered callbacks safely across event loops
             for cb in self.telemetry_callbacks:
                 if asyncio.iscoroutinefunction(cb):
-                    asyncio.create_task(cb(normalized))
+                    if self.loop and self.loop.is_running():
+                        asyncio.run_coroutine_threadsafe(cb(normalized), self.loop)
+                    else:
+                        asyncio.create_task(cb(normalized))
                 else:
                     cb(normalized)
         except Exception as e:
@@ -49,6 +53,11 @@ class MQTTManager:
             self.client.publish(topic, json.dumps(payload))
 
     async def start(self):
+        try:
+            self.loop = asyncio.get_running_loop()
+        except RuntimeError:
+            self.loop = None
+
         try:
             self.client = mqtt.Client(client_id=settings.MQTT_CLIENT_ID, callback_api_version=mqtt.CallbackAPIVersion.VERSION2)
             self.client.on_connect = self.on_connect

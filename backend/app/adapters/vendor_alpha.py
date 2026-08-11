@@ -7,11 +7,25 @@ class VendorAlphaAdapter(BaseRobotAdapter):
         return "Vendor Alpha"
 
     def normalize_telemetry(self, raw_payload: Dict[str, Any]) -> Dict[str, Any]:
+        if not isinstance(raw_payload, dict):
+            raw_payload = {}
+
         unit_id = str(raw_payload.get("unit", "R01"))
-        battery = float(raw_payload.get("battery_pct", 100.0))
-        pos = raw_payload.get("pos", [0.0, 0.0])
-        x = float(pos[0]) if len(pos) > 0 else 0.0
-        y = float(pos[1]) if len(pos) > 1 else 0.0
+        
+        try:
+            battery = float(raw_payload.get("battery_pct", 100.0))
+        except (ValueError, TypeError):
+            battery = 100.0
+        battery = max(0.0, min(100.0, battery))
+
+        pos = raw_payload.get("pos")
+        x, y = 0.0, 0.0
+        if isinstance(pos, list) and len(pos) >= 2:
+            try:
+                x = float(pos[0])
+                y = float(pos[1])
+            except (ValueError, TypeError):
+                x, y = 0.0, 0.0
 
         raw_mode = str(raw_payload.get("mode", "ready")).lower()
         mode_map = {
@@ -32,7 +46,7 @@ class VendorAlphaAdapter(BaseRobotAdapter):
             "status": status,
             "x": round(x, 2),
             "y": round(y, 2),
-            "current_node": raw_payload.get("waypoint", "N01"),
+            "current_node": str(raw_payload.get("waypoint", "N01")),
             "raw_payload": raw_payload
         }
 

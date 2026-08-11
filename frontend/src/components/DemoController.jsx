@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, Sparkles, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Play, Sparkles, CheckCircle2, RotateCcw } from 'lucide-react';
 import { api } from '../services/api';
 
 export function DemoController({ onActTriggered }) {
@@ -32,6 +32,22 @@ export function DemoController({ onActTriggered }) {
     }
   };
 
+  const handleResetDemo = async () => {
+    setLoading(true);
+    setActiveAct(null);
+    setStatusMsg(null);
+    try {
+      const res = await api.resetDemo();
+      setStatusMsg(res.data.message || 'Demo Reset Successfully!');
+      if (onActTriggered) onActTriggered('reset');
+    } catch (err) {
+      console.error(err);
+      setStatusMsg('Demo Reset Failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="fixed bottom-6 right-6 z-50 glass-panel-glow p-4 w-96 space-y-3 shadow-2xl backdrop-blur-xl border border-blue-500/40">
       <div className="flex items-center justify-between border-b border-gray-800 pb-2">
@@ -39,9 +55,15 @@ export function DemoController({ onActTriggered }) {
           <Sparkles className="w-4 h-4 text-blue-400 animate-spin" />
           <h3 className="text-sm font-bold text-white tracking-wide">JUDGE DEMO CONTROLLER</h3>
         </div>
-        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">
-          DETERMINISTIC
-        </span>
+        <button
+          onClick={handleResetDemo}
+          disabled={loading}
+          className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 transition-colors"
+          title="Reset fleet positions & jobs for repeat demo"
+        >
+          <RotateCcw className="w-3 h-3" />
+          RESET DEMO
+        </button>
       </div>
 
       <div className="grid grid-cols-2 gap-2">

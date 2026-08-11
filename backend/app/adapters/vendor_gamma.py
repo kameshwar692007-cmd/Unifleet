@@ -7,13 +7,27 @@ class VendorGammaAdapter(BaseRobotAdapter):
         return "Vendor Gamma"
 
     def normalize_telemetry(self, raw_payload: Dict[str, Any]) -> Dict[str, Any]:
-        dev_id = str(raw_payload.get("dev_id", "R04"))
-        battery = float(raw_payload.get("b_lvl", 100.0))
+        if not isinstance(raw_payload, dict):
+            raw_payload = {}
 
-        loc = raw_payload.get("location", {})
-        x = float(loc.get("px", 0.0))
-        y = float(loc.get("py", 0.0))
-        node_id = loc.get("node_id", "N01")
+        dev_id = str(raw_payload.get("dev_id", "R04"))
+        
+        try:
+            battery = float(raw_payload.get("b_lvl", 100.0))
+        except (ValueError, TypeError):
+            battery = 100.0
+        battery = max(0.0, min(100.0, battery))
+
+        loc = raw_payload.get("location")
+        x, y = 0.0, 0.0
+        node_id = "N01"
+        if isinstance(loc, dict):
+            try:
+                x = float(loc.get("px", 0.0))
+                y = float(loc.get("py", 0.0))
+            except (ValueError, TypeError):
+                x, y = 0.0, 0.0
+            node_id = str(loc.get("node_id", "N01"))
 
         op_state = str(raw_payload.get("op_state", "IDLE")).upper()
         state_map = {
