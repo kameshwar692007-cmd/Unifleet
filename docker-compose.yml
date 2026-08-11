@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: unifleet_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: unifleet
+      POSTGRES_PASSWORD: unifleet_secret_pass
+      POSTGRES_DB: unifleet_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U unifleet -d unifleet_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    container_name: unifleet_mosquitto
+    restart: always
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+volumes:
+  postgres_data:
