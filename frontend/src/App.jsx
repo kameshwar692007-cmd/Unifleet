@@ -58,7 +58,13 @@ export function App() {
   const renderActivePage = () => {
     switch (activeTab) {
       case 'overview':
-        return <OverviewPage fleetState={fleetState} onNavigateTwin={() => setActiveTab('digital-twin')} />;
+        return (
+          <OverviewPage 
+            fleetState={fleetState} 
+            onNavigateTwin={() => setActiveTab('digital-twin')} 
+            onNavigateEvents={() => setActiveTab('events')}
+          />
+        );
       case 'digital-twin':
         return (
           <DigitalTwinPage 

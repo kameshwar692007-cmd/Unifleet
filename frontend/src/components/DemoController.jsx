@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Play, Sparkles, CheckCircle2, RotateCcw, Compass } from 'lucide-react';
+import { Play, RotateCcw, Compass, ChevronDown, ChevronUp, Sparkles, CheckCircle2 } from 'lucide-react';
 import { api } from '../services/api';
 
 export function DemoController({ onActTriggered }) {
+  const [isExpanded, setIsExpanded] = useState(false);
   const [activeAct, setActiveAct] = useState(null);
   const [loading, setLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState(null);
@@ -32,7 +33,8 @@ export function DemoController({ onActTriggered }) {
     }
   };
 
-  const handleResetDemo = async () => {
+  const handleResetDemo = async (e) => {
+    e.stopPropagation();
     setLoading(true);
     setActiveAct(null);
     setStatusMsg(null);
@@ -48,23 +50,56 @@ export function DemoController({ onActTriggered }) {
     }
   };
 
+  if (!isExpanded) {
+    return (
+      <div className="fixed bottom-5 right-5 z-50 flex items-center gap-2 select-none font-mono">
+        <button
+          onClick={handleResetDemo}
+          disabled={loading}
+          className="p-2.5 rounded-xl bg-slate-900/90 border border-rose-500/40 text-rose-300 hover:bg-rose-950/60 transition-all shadow-xl backdrop-blur-xl flex items-center gap-1.5 text-xs font-bold"
+          title="Reset fleet positions & jobs"
+        >
+          <RotateCcw className="w-3.5 h-3.5" />
+          <span>RESET</span>
+        </button>
+
+        <button
+          onClick={() => setIsExpanded(true)}
+          className="px-4 py-2.5 rounded-xl bg-cyan-600/90 hover:bg-cyan-500 text-white font-bold text-xs flex items-center gap-2 shadow-2xl backdrop-blur-xl border border-cyan-400/50 transition-all hover:scale-105"
+        >
+          <Compass className="w-4 h-4 animate-spin text-cyan-200" />
+          <span>▶ GUIDED DEMO (ACTS 1–6)</span>
+          <ChevronUp className="w-4 h-4" />
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="fixed bottom-5 right-5 z-50 p-4 w-96 space-y-3 shadow-2xl backdrop-blur-2xl bg-[#0F172A]/95 border border-slate-700/80 rounded-2xl select-none font-mono">
+    <div className="fixed bottom-5 right-5 z-50 p-4 w-96 space-y-3 shadow-2xl backdrop-blur-2xl bg-[#0F172A]/95 border border-cyan-500/50 rounded-2xl select-none font-mono animate-in fade-in slide-in-from-bottom-3 duration-200">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
         <div className="flex items-center gap-2">
           <Compass className="w-4 h-4 text-cyan-400 animate-spin" />
           <h3 className="text-xs font-bold text-white tracking-widest uppercase">GUIDED DEMO COMMAND CENTER</h3>
         </div>
-        <button
-          onClick={handleResetDemo}
-          disabled={loading}
-          className="flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 transition-colors"
-          title="Reset fleet positions, jobs & routes cleanly for repeat judge evaluation"
-        >
-          <RotateCcw className="w-3 h-3" />
-          RESET DEMO
-        </button>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleResetDemo}
+            disabled={loading}
+            className="flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 transition-colors"
+          >
+            <RotateCcw className="w-3 h-3" />
+            RESET
+          </button>
+          <button
+            onClick={() => setIsExpanded(false)}
+            className="p-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white"
+          >
+            <ChevronDown className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* Grid of Acts 1 through 6 */}
@@ -78,7 +113,7 @@ export function DemoController({ onActTriggered }) {
               act.isHero
                 ? 'bg-rose-950/40 border-rose-500/60 hover:border-rose-400 shadow-lg shadow-rose-500/10'
                 : activeAct === act.num
-                ? 'bg-cyan-600/25 border-cyan-400 text-white font-bold'
+                ? 'bg-cyan-600/30 border-cyan-400 text-white font-bold'
                 : 'bg-slate-900/80 border-slate-800 text-slate-300 hover:bg-slate-800/80'
             }`}
           >
