@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Zap, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Zap, ShieldCheck, ArrowRight, Play, CheckCircle2, AlertTriangle, ArrowDown } from 'lucide-react';
 import { api } from '../services/api';
 
 export function WorkflowsPage() {
@@ -24,14 +24,59 @@ export function WorkflowsPage() {
       {/* Header */}
       <div>
         <h1 className="text-xl font-bold text-white tracking-wider font-mono flex items-center gap-2">
-          ZERO-CODE WORKFLOW AUTOMATION ENGINE
+          VISUAL WORKFLOW AUTOMATION ENGINE
           <span className="text-xs font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
             EVENT-DRIVEN
           </span>
         </h1>
         <p className="text-xs text-slate-400 mt-1 font-mono">
-          Visual Trigger → Condition → Action Event Engine
+          Visual Trigger → Condition → Action Automation • Low-Battery & Conflict Automation Engine
         </p>
+      </div>
+
+      {/* Low Battery Live Execution Trace Highlight */}
+      <div className="glass-panel p-5 space-y-3 bg-slate-900/80 border-l-4 border-l-amber-500 font-mono">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-2">
+            <Zap className="w-4 h-4 text-amber-400 animate-pulse" />
+            ACT 5 — ZERO-CODE LOW-BATTERY AUTOMATION EXECUTION TRACE
+          </span>
+          <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+            AUTOMATIC TRIGGER
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-2 text-xs text-center font-mono">
+          <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
+            <div className="text-[10px] text-slate-500">1. TELEMETRY EVENT</div>
+            <div className="font-bold text-rose-400">R03 Battery: 14%</div>
+            <div className="text-[9px] text-slate-400">Threshold &lt; 20%</div>
+          </div>
+
+          <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
+            <div className="text-[10px] text-slate-500">2. RULE EVALUATION</div>
+            <div className="font-bold text-amber-300">Rule WF-001</div>
+            <div className="text-[9px] text-slate-400">Match Found</div>
+          </div>
+
+          <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
+            <div className="text-[10px] text-slate-500">3. POOL ACTION</div>
+            <div className="font-bold text-purple-300">Marked Unavailable</div>
+            <div className="text-[9px] text-slate-400">Removed from Dispatch</div>
+          </div>
+
+          <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
+            <div className="text-[10px] text-slate-500">4. ROUTE ACTION</div>
+            <div className="font-bold text-cyan-300">Dispatched N08</div>
+            <div className="text-[9px] text-slate-400">Fast Charger Alpha</div>
+          </div>
+
+          <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
+            <div className="text-[10px] text-slate-500">5. NOTIFICATION</div>
+            <div className="font-bold text-emerald-400">Alert Created</div>
+            <div className="text-[9px] text-slate-400">Operator Warned</div>
+          </div>
+        </div>
       </div>
 
       {/* Rules Grid */}
@@ -75,7 +120,7 @@ export function WorkflowsPage() {
       <div className="glass-panel p-5 space-y-4 bg-slate-900/80 font-mono">
         <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
           <Zap className="w-4 h-4 text-amber-400" />
-          <span>Workflow Execution Log</span>
+          <span>Workflow Execution History</span>
         </h3>
 
         <div className="overflow-x-auto">

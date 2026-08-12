@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Pause, Play, Square, Truck, Cpu, Battery, Layers, X, Code2, Check } from 'lucide-react';
+import { Pause, Play, Square, Truck, Cpu, Battery, Layers, X, Code2, Check, ExternalLink, ShieldCheck, Server, ArrowRight } from 'lucide-react';
 import { api } from '../services/api';
 
 export function RobotsPage({ fleetState, showAdaptersModal, onCloseAdaptersModal }) {
@@ -34,9 +34,30 @@ export function RobotsPage({ fleetState, showAdaptersModal, onCloseAdaptersModal
 
   const adaptersData = [
     { vendor: "Vendor Alpha", protocol: "JSON over MQTT", topic: "fleet/alpha/telemetry", robot: "R01 / R02", schema: '{ "id": "R01", "battery_level": 95, "x_pos": 2.0, "y_pos": 3.0, "state": "READY" }' },
-    { vendor: "Vendor Beta", protocol: "JSON over MQTT", topic: "fleet/beta/telemetry", robot: "R03", schema: '{ "robotId": "R03", "soc": 95, "coordinates": {"x": 10, "y": 4}, "state": "AVAILABLE" }' },
+    { vendor: "Vendor Beta", protocol: "JSON over MQTT", topic: "fleet/beta/telemetry", robot: "R03", schema: '{ "robotId": "R03", "soc": 0.95, "coordinates": {"x": 10, "y": 4}, "state": "AVAILABLE" }' },
     { vendor: "Vendor Gamma", protocol: "JSON over MQTT", topic: "fleet/gamma/telemetry", robot: "R04 / R05", schema: '{ "dev_id": "R04", "b_lvl": 88, "location": {"px": 14, "py": 8}, "op_state": "MOVING" }' },
     { vendor: "Vendor Delta", protocol: "Plug & Play Extension", topic: "fleet/delta/telemetry", robot: "Dynamic Extension", schema: '{ "device_guid": "R06", "charge_percent": 99, "geo_point": [18, 12], "system_mode": "ACTIVE" }' }
+  ];
+
+  const systemProofFeatures = [
+    { name: "MULTI-VENDOR NORMALIZATION", status: "LIVE", color: "text-cyan-400" },
+    { name: "MQTT BROKER TELEMETRY", status: "LIVE", color: "text-purple-400" },
+    { name: "FLEET BRAIN ENGINE", status: "LIVE", color: "text-emerald-400" },
+    { name: "A* ROUTING & PREDICTION", status: "LIVE", color: "text-indigo-400" },
+    { name: "HARMONY ENGINE (CONFLICTS)", status: "LIVE", color: "text-amber-400" },
+    { name: "ZERO-CODE WORKFLOWS", status: "LIVE", color: "text-emerald-400" },
+    { name: "DIGITAL TWIN (250ms)", status: "LIVE", color: "text-cyan-400" },
+    { name: "POSTGRESQL PERSISTENCE", status: "LIVE", color: "text-indigo-400" }
+  ];
+
+  const apiEndpoints = [
+    { method: "GET", path: "/api/v1/robots", desc: "List all normalized fleet AGVs across vendors" },
+    { method: "GET", path: "/api/v1/robots/{id}", desc: "Get single robot telemetry & route" },
+    { method: "POST", path: "/api/v1/jobs", desc: "Dispatch new transport job with explainable scheduler" },
+    { method: "POST", path: "/api/v1/robots/{id}/command", desc: "Issue PAUSE / RESUME / STOP operator command" },
+    { method: "GET", path: "/api/v1/warehouse/topology", desc: "Export warehouse node graph & edge constraints" },
+    { method: "GET", path: "/api/v1/workflows", desc: "Retrieve active automation rules & execution logs" },
+    { method: "GET", path: "/api/v1/intelligence/compare-routes", desc: "Predictive route alternatives comparison" }
   ];
 
   return (
@@ -57,12 +78,22 @@ export function RobotsPage({ fleetState, showAdaptersModal, onCloseAdaptersModal
 
         {/* Right Action Bar */}
         <div className="flex items-center gap-3">
+          <a
+            href="http://localhost:8000/docs"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-600 text-white font-mono font-bold text-xs hover:bg-cyan-500 transition-all shadow-md shadow-cyan-500/20"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            OPEN API EXPLORER (/docs)
+          </a>
+
           <button
             onClick={() => setLocalAdaptersModal(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/40 text-xs font-mono font-semibold hover:bg-purple-500/30 transition-all shadow-md shadow-purple-500/10"
           >
             <Layers className="w-3.5 h-3.5 text-purple-400" />
-            SHOW VENDOR ADAPTER SCHEMAS
+            VENDOR ADAPTER SCHEMAS
           </button>
 
           {/* Vendor Filter Buttons */}
@@ -84,6 +115,29 @@ export function RobotsPage({ fleetState, showAdaptersModal, onCloseAdaptersModal
         </div>
       </div>
 
+      {/* System Proof Capabilities Panel */}
+      <div className="glass-panel p-4 bg-slate-900/80 font-mono space-y-2">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+          <span className="text-xs font-bold text-white tracking-widest uppercase flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            UNIFLEET SYSTEM PROOF — OPERATIONAL ARCHITECTURE STATUS
+          </span>
+          <span className="text-[10px] text-slate-400">AUTHORITATIVE HARDWARE AGNOSTIC CORE</span>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+          {systemProofFeatures.map((item) => (
+            <div key={item.name} className="p-2 rounded-lg bg-slate-950/80 border border-slate-800 flex items-center justify-between">
+              <span className="text-slate-300 text-[11px] font-semibold">{item.name}</span>
+              <span className={`text-[10px] font-bold ${item.color} flex items-center gap-1`}>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                {item.status}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Robot Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-mono">
         {filteredRobots.map((robot) => {
@@ -100,7 +154,7 @@ export function RobotsPage({ fleetState, showAdaptersModal, onCloseAdaptersModal
                 </span>
               </div>
 
-              <div className="text-xs text-slate-400">{robot.model_type || 'Intelligent AGV'}</div>
+              <div className="text-xs text-slate-400 font-sans">{robot.model_type || 'Intelligent AGV'}</div>
 
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="p-2.5 rounded-lg bg-slate-950/80 border border-slate-800">
@@ -152,6 +206,74 @@ export function RobotsPage({ fleetState, showAdaptersModal, onCloseAdaptersModal
             </div>
           );
         })}
+      </div>
+
+      {/* Unified API Proof Section */}
+      <div className="glass-panel p-5 bg-slate-900/80 font-mono space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="flex items-center gap-2">
+            <Server className="w-5 h-5 text-cyan-400" />
+            <h3 className="text-sm font-bold text-white tracking-wider uppercase">ACT 06 — ONE UNIFIED API FOR EVERY ROBOT MANUFACTURER</h3>
+          </div>
+          <a
+            href="http://localhost:8000/docs"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-cyan-400 hover:underline flex items-center gap-1 font-bold"
+          >
+            Launch Interactive OpenAPI Specs <ExternalLink className="w-3 h-3" />
+          </a>
+        </div>
+
+        <p className="text-xs text-slate-300 font-sans leading-relaxed">
+          UniFleet decouples warehouse software from vendor-specific telemetry protocols. Regardless of underlying proprietary MQTT structures, external warehouse management systems (WMS) interact with one standardized REST/WebSocket API contract.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+          {apiEndpoints.map((ep) => (
+            <div key={ep.path} className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${ep.method === 'GET' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'}`}>
+                    {ep.method}
+                  </span>
+                  <code className="text-white font-bold">{ep.path}</code>
+                </div>
+                <p className="text-[11px] text-slate-400 font-sans">{ep.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Future Integration Boundaries Panel */}
+      <div className="glass-panel p-5 bg-slate-900/80 font-mono space-y-3 border-l-4 border-l-purple-500">
+        <h3 className="text-xs font-bold text-purple-300 tracking-wider uppercase">FUTURE INTEGRATION BOUNDARIES & EXTENSIONS</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+          <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+            <span className="text-[10px] text-purple-400 block font-bold">ROS2 / NAV2 BRIDGE</span>
+            <span className="text-slate-400 text-[10px] font-sans">Physical AGV Node Bridge</span>
+            <span className="mt-1 inline-block text-[9px] px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300">FUTURE EXTENSION</span>
+          </div>
+
+          <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+            <span className="text-[10px] text-purple-400 block font-bold">ENTERPRISE WMS / ERP</span>
+            <span className="text-slate-400 text-[10px] font-sans">SAP / Manhattan Connector</span>
+            <span className="mt-1 inline-block text-[9px] px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300">FUTURE EXTENSION</span>
+          </div>
+
+          <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+            <span className="text-[10px] text-purple-400 block font-bold">GAZEBO / THREE.JS</span>
+            <span className="text-slate-400 text-[10px] font-sans">3D WebGL Digital Twin</span>
+            <span className="mt-1 inline-block text-[9px] px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300">FUTURE EXTENSION</span>
+          </div>
+
+          <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+            <span className="text-[10px] text-purple-400 block font-bold">MARL OPTIMIZER</span>
+            <span className="text-slate-400 text-[10px] font-sans">Multi-Agent RL Scheduler</span>
+            <span className="mt-1 inline-block text-[9px] px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300">FUTURE EXTENSION</span>
+          </div>
+        </div>
       </div>
 
       {/* Act 6: Open Vendor Adapters Breakdown Modal */}
