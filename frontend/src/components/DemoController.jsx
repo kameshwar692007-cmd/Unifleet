@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, Sparkles, CheckCircle2, RotateCcw } from 'lucide-react';
+import { Play, Sparkles, CheckCircle2, RotateCcw, Compass } from 'lucide-react';
 import { api } from '../services/api';
 
 export function DemoController({ onActTriggered }) {
@@ -8,12 +8,12 @@ export function DemoController({ onActTriggered }) {
   const [statusMsg, setStatusMsg] = useState(null);
 
   const acts = [
-    { num: 1, label: 'Act 1: Unified Fleet', desc: '5 AGVs across 3 vendors initialized' },
-    { num: 2, label: 'Act 2: Digital Twin', desc: 'Inspect live telemetry stream' },
-    { num: 3, label: 'Act 3: Assign Job', desc: 'Storage A -> Packing B' },
-    { num: 4, label: 'Act 4: HERO MOMENT', desc: 'Conflict Prediction at N11', isHero: true },
-    { num: 5, label: 'Act 5: Low Battery', desc: 'Zero-code workflow auto-charge' },
-    { num: 6, label: 'Act 6: Adapters', desc: 'Open Architecture showcase' }
+    { num: 1, label: '01 — Unified Fleet', desc: '5 AGVs across 3 vendors initialized' },
+    { num: 2, label: '02 — Digital Twin', desc: 'Inspect live telemetry stream' },
+    { num: 3, label: '03 — Smart Job', desc: 'Storage A (N02) -> Packing B (N06)' },
+    { num: 4, label: '04 — HERO MOMENT', desc: 'Conflict Prediction at Junction N11', isHero: true },
+    { num: 5, label: '05 — Low Battery', desc: 'Zero-code workflow auto-charge' },
+    { num: 6, label: '06 — Open Adapters', desc: 'Multi-vendor architecture showcase' }
   ];
 
   const handleRunAct = async (actNum) => {
@@ -49,23 +49,25 @@ export function DemoController({ onActTriggered }) {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 glass-panel-glow p-4 w-96 space-y-3 shadow-2xl backdrop-blur-xl border border-blue-500/40">
-      <div className="flex items-center justify-between border-b border-gray-800 pb-2">
+    <div className="fixed bottom-5 right-5 z-50 p-4 w-96 space-y-3 shadow-2xl backdrop-blur-2xl bg-[#0F172A]/95 border border-slate-700/80 rounded-2xl select-none font-mono">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-blue-400 animate-spin" />
-          <h3 className="text-sm font-bold text-white tracking-wide">JUDGE DEMO CONTROLLER</h3>
+          <Compass className="w-4 h-4 text-cyan-400 animate-spin" />
+          <h3 className="text-xs font-bold text-white tracking-widest uppercase">GUIDED DEMO COMMAND CENTER</h3>
         </div>
         <button
           onClick={handleResetDemo}
           disabled={loading}
-          className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 transition-colors"
-          title="Reset fleet positions & jobs for repeat demo"
+          className="flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 transition-colors"
+          title="Reset fleet positions, jobs & routes cleanly for repeat judge evaluation"
         >
           <RotateCcw className="w-3 h-3" />
           RESET DEMO
         </button>
       </div>
 
+      {/* Grid of Acts 1 through 6 */}
       <div className="grid grid-cols-2 gap-2">
         {acts.map((act) => (
           <button
@@ -74,25 +76,26 @@ export function DemoController({ onActTriggered }) {
             disabled={loading}
             className={`p-2.5 rounded-xl border text-left transition-all duration-200 ${
               act.isHero
-                ? 'bg-gradient-to-r from-rose-900/40 to-amber-900/40 border-rose-500/50 hover:border-rose-400 shadow-lg shadow-rose-500/10'
+                ? 'bg-rose-950/40 border-rose-500/60 hover:border-rose-400 shadow-lg shadow-rose-500/10'
                 : activeAct === act.num
-                ? 'bg-blue-600/30 border-blue-400 text-white'
-                : 'bg-gray-900/70 border-gray-800 text-gray-300 hover:bg-gray-800'
+                ? 'bg-cyan-600/25 border-cyan-400 text-white font-bold'
+                : 'bg-slate-900/80 border-slate-800 text-slate-300 hover:bg-slate-800/80'
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className={`text-xs font-bold ${act.isHero ? 'text-rose-300' : 'text-white'}`}>
+              <span className={`text-[11px] font-bold ${act.isHero ? 'text-rose-300' : 'text-slate-100'}`}>
                 {act.label}
               </span>
-              <Play className="w-3 h-3 text-blue-400" />
+              <Play className="w-3 h-3 text-cyan-400 shrink-0" />
             </div>
-            <p className="text-[10px] text-gray-400 mt-1 line-clamp-1">{act.desc}</p>
+            <p className="text-[9px] text-slate-400 mt-1 line-clamp-1 font-sans">{act.desc}</p>
           </button>
         ))}
       </div>
 
+      {/* Execution Toast / Status */}
       {statusMsg && (
-        <div className="p-2 rounded-lg bg-emerald-950/60 border border-emerald-500/40 text-xs text-emerald-300 flex items-center gap-2">
+        <div className="p-2 rounded-lg bg-emerald-950/80 border border-emerald-500/40 text-[11px] text-emerald-300 flex items-center gap-2">
           <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
           <span className="truncate">{statusMsg}</span>
         </div>

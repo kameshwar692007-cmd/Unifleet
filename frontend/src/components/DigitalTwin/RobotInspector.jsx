@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pause, Play, Square, Cpu, Battery, MapPin, Activity, Code2, AlertTriangle } from 'lucide-react';
+import { Pause, Play, Square, Cpu, Battery, MapPin, Activity, Code2, Shield, Radio } from 'lucide-react';
 import { api } from '../../services/api';
 
 export function RobotInspector({ robot, onClose }) {
@@ -7,16 +7,18 @@ export function RobotInspector({ robot, onClose }) {
   const [cmdSuccess, setCmdSuccess] = useState(null);
 
   if (!robot) return null;
+  const robotId = robot.robot_id || robot.id;
 
   const handleCommand = async (cmd) => {
     setLoadingCmd(true);
     setCmdSuccess(null);
     try {
-      await api.sendRobotCommand(robot.id, cmd);
-      setCmdSuccess(`Issued ${cmd} to ${robot.id}`);
-      setTimeout(() => setCmdSuccess(null), 3000);
+      await api.sendRobotCommand(robotId, cmd);
+      setCmdSuccess(`Command '${cmd}' dispatched to ${robotId}`);
+      setTimeout(() => setCmdSuccess(null), 3500);
     } catch (e) {
       console.error(e);
+      setCmdSuccess(`Command failed`);
     } finally {
       setLoadingCmd(false);
     }
@@ -25,73 +27,101 @@ export function RobotInspector({ robot, onClose }) {
   const getVendorBadgeClass = (vendor) => {
     if (vendor === 'Vendor Alpha') return 'badge-vendor-alpha';
     if (vendor === 'Vendor Beta') return 'badge-vendor-beta';
+    if (vendor === 'Vendor Delta') return 'badge-vendor-delta';
     return 'badge-vendor-gamma';
   };
 
+  const batteryColor = robot.battery < 20 ? 'bg-rose-500 text-rose-400' : robot.battery < 50 ? 'bg-amber-500 text-amber-400' : 'bg-emerald-500 text-emerald-400';
+
   return (
-    <div className="w-96 border-l border-[var(--border-glass)] bg-[var(--bg-card)] p-5 flex flex-col justify-between overflow-y-auto shrink-0 shadow-2xl backdrop-blur-md">
-      <div className="space-y-6">
+    <div className="w-96 border-l border-slate-800/80 bg-[#0F172A]/95 p-5 flex flex-col justify-between overflow-y-auto shrink-0 shadow-2xl backdrop-blur-xl select-none">
+      <div className="space-y-5">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-800 pb-4">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-3.5">
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-xl font-bold text-white">{robot.id}</h3>
+              <h3 className="text-xl font-bold text-white font-mono">{robotId}</h3>
               <span className={`badge ${getVendorBadgeClass(robot.vendor)}`}>
                 {robot.vendor}
               </span>
             </div>
-            <p className="text-xs text-gray-400 mt-1">{robot.model_type}</p>
+            <p className="text-xs text-slate-400 mt-0.5">{robot.model_type || 'Intelligent Fleet AGV'}</p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-white text-lg">×</button>
+          <button 
+            onClick={onClose} 
+            className="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-sm font-bold transition-colors"
+          >
+            ×
+          </button>
         </div>
 
-        {/* Status Metrics Grid */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="p-3 rounded-xl bg-gray-900/60 border border-gray-800 space-y-1">
-            <div className="flex items-center gap-1.5 text-xs text-gray-400">
-              <Activity className="w-3.5 h-3.5 text-blue-400" />
-              <span>Status</span>
+        {/* Battery Bar Meter */}
+        <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2">
+          <div className="flex items-center justify-between text-xs font-mono">
+            <span className="flex items-center gap-1.5 text-slate-400">
+              <Battery className="w-4 h-4 text-emerald-400" /> Battery Level
+            </span>
+            <span className={`font-bold ${robot.battery < 20 ? 'text-rose-400 animate-pulse' : 'text-emerald-400'}`}>
+              {Math.round(robot.battery)}%
+            </span>
+          </div>
+          <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+            <div 
+              className={`h-full rounded-full transition-all duration-300 ${robot.battery < 20 ? 'bg-rose-500' : robot.battery < 50 ? 'bg-amber-500' : 'bg-emerald-400'}`}
+              style={{ width: `${Math.max(5, Math.min(100, robot.battery))}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Real Status Metrics Grid */}
+        <div className="grid grid-cols-2 gap-3 font-mono">
+          <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
+            <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
+              <Activity className="w-3.5 h-3.5 text-cyan-400" />
+              <span>OPERATIONAL STATE</span>
             </div>
-            <div className="text-sm font-bold text-white uppercase">{robot.status}</div>
+            <div className="text-xs font-bold text-cyan-300 uppercase">{robot.status}</div>
           </div>
 
-          <div className="p-3 rounded-xl bg-gray-900/60 border border-gray-800 space-y-1">
-            <div className="flex items-center gap-1.5 text-xs text-gray-400">
-              <Battery className="w-3.5 h-3.5 text-amber-400" />
-              <span>Battery</span>
-            </div>
-            <div className="text-sm font-bold text-amber-400">{Math.round(robot.battery)}%</div>
-          </div>
-
-          <div className="p-3 rounded-xl bg-gray-900/60 border border-gray-800 space-y-1">
-            <div className="flex items-center gap-1.5 text-xs text-gray-400">
+          <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
+            <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
               <MapPin className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Location</span>
+              <span>WAYPOINT</span>
             </div>
-            <div className="text-xs font-mono font-bold text-emerald-300">
-              ({robot.x.toFixed(1)}, {robot.y.toFixed(1)}) • {robot.current_node}
+            <div className="text-xs font-bold text-emerald-300">
+              {robot.current_node} ({robot.x.toFixed(1)}, {robot.y.toFixed(1)})
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-gray-900/60 border border-gray-800 space-y-1">
-            <div className="flex items-center gap-1.5 text-xs text-gray-400">
-              <Cpu className="w-3.5 h-3.5 text-purple-400" />
-              <span>Active Job</span>
+          <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
+            <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
+              <Cpu className="w-3.5 h-3.5 text-indigo-400" />
+              <span>ACTIVE JOB</span>
             </div>
-            <div className="text-xs font-mono font-bold text-purple-300">
+            <div className="text-xs font-bold text-indigo-300 truncate">
               {robot.current_job_id || 'NONE'}
             </div>
+          </div>
+
+          <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1">
+            <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
+              <Radio className="w-3.5 h-3.5 text-purple-400" />
+              <span>PROTOCOL</span>
+            </div>
+            <div className="text-xs font-bold text-purple-300">MQTT JSON</div>
           </div>
         </div>
 
         {/* Manual Command Controls */}
         <div className="space-y-2">
-          <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">Manual Operator Overrides</div>
+          <div className="text-[11px] font-bold font-mono text-slate-400 uppercase tracking-wider">
+            Operator Overrides
+          </div>
           <div className="grid grid-cols-3 gap-2">
             <button
               onClick={() => handleCommand('PAUSE')}
               disabled={loadingCmd}
-              className="py-2.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold text-xs flex items-center justify-center gap-1.5 hover:bg-amber-500/30 transition-all"
+              className="py-2.5 rounded-xl bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold text-xs font-mono flex items-center justify-center gap-1.5 hover:bg-amber-500/25 transition-all"
             >
               <Pause className="w-3.5 h-3.5" />
               <span>PAUSE</span>
@@ -100,7 +130,7 @@ export function RobotInspector({ robot, onClose }) {
             <button
               onClick={() => handleCommand('RESUME')}
               disabled={loadingCmd}
-              className="py-2.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-semibold text-xs flex items-center justify-center gap-1.5 hover:bg-emerald-500/30 transition-all"
+              className="py-2.5 rounded-xl bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-semibold text-xs font-mono flex items-center justify-center gap-1.5 hover:bg-emerald-500/25 transition-all"
             >
               <Play className="w-3.5 h-3.5" />
               <span>RESUME</span>
@@ -109,30 +139,32 @@ export function RobotInspector({ robot, onClose }) {
             <button
               onClick={() => handleCommand('STOP')}
               disabled={loadingCmd}
-              className="py-2.5 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-500/40 font-semibold text-xs flex items-center justify-center gap-1.5 hover:bg-rose-500/30 transition-all"
+              className="py-2.5 rounded-xl bg-rose-500/15 text-rose-300 border border-rose-500/30 font-semibold text-xs font-mono flex items-center justify-center gap-1.5 hover:bg-rose-500/25 transition-all"
             >
               <Square className="w-3.5 h-3.5" />
               <span>STOP</span>
             </button>
           </div>
-          {cmdSuccess && <div className="text-xs text-emerald-400 font-medium text-center">{cmdSuccess}</div>}
+          {cmdSuccess && <div className="text-xs text-emerald-400 font-mono text-center pt-1">{cmdSuccess}</div>}
         </div>
 
         {/* Adapter Normalization View */}
         <div className="space-y-2">
-          <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-wider">
-            <Code2 className="w-3.5 h-3.5 text-blue-400" />
-            <span>Adapter Telemetry Inspection</span>
+          <div className="flex items-center gap-2 text-[11px] font-bold font-mono text-slate-400 uppercase tracking-wider">
+            <Code2 className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Normalized Telemetry Stream</span>
           </div>
-          <div className="p-3 rounded-xl bg-black/70 border border-gray-800 text-[11px] font-mono text-gray-300 space-y-1">
-            <div className="text-gray-500">// Raw MQTT Payload Format ({robot.vendor}):</div>
-            <pre className="text-blue-300 overflow-x-auto">
+          <div className="p-3 rounded-xl bg-slate-950/90 border border-slate-800 text-[11px] font-mono text-slate-300 space-y-1">
+            <div className="text-slate-500">// Authoritative Backend Model ({robot.vendor}):</div>
+            <pre className="text-cyan-300 overflow-x-auto">
               {JSON.stringify({
-                robot_id: robot.id,
+                robot_id: robotId,
                 vendor: robot.vendor,
                 battery: robot.battery,
                 status: robot.status,
-                coordinates: { x: robot.x, y: robot.y }
+                current_node: robot.current_node,
+                x: robot.x,
+                y: robot.y
               }, null, 2)}
             </pre>
           </div>

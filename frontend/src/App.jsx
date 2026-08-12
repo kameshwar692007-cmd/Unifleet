@@ -13,7 +13,8 @@ import { useFleetWebSocket } from './services/useFleetWebSocket';
 import { api } from './services/api';
 
 export function App() {
-  const [activeTab, setActiveTab] = useState('digital-twin'); // Hero feature default
+  const [activeTab, setActiveTab] = useState('digital-twin'); // Digital Twin is hero centerpiece
+  const [isPresentationMode, setIsPresentationMode] = useState(false);
   const [topologyData, setTopologyData] = useState(null);
   const { fleetState, isConnected } = useFleetWebSocket();
 
@@ -51,14 +52,21 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-gray-100 flex flex-col font-sans">
-      {/* Header */}
-      <Navbar isConnected={isConnected} fleetState={fleetState} />
+    <div className="min-h-screen bg-[#090D16] text-slate-100 flex flex-col font-sans selection:bg-cyan-500/30">
+      {/* Global Status Bar */}
+      <Navbar 
+        isConnected={isConnected} 
+        fleetState={fleetState} 
+        isPresentationMode={isPresentationMode}
+        setIsPresentationMode={setIsPresentationMode}
+      />
 
       {/* Main Layout Area */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Navigation Sidebar */}
-        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+        {/* Navigation Sidebar (Collapsible in Presentation Mode) */}
+        {!isPresentationMode && (
+          <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+        )}
 
         {/* Dynamic Page View */}
         <main className="flex-1 overflow-y-auto relative">
@@ -66,7 +74,7 @@ export function App() {
         </main>
       </div>
 
-      {/* Floating Judge Demo Controller Panel */}
+      {/* Floating Guided Demo Command Center */}
       <DemoController onActTriggered={() => setActiveTab('digital-twin')} />
     </div>
   );

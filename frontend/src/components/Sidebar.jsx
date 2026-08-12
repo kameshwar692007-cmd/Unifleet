@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Map, Truck, Briefcase, Zap, BrainCircuit, Bell } from 'lucide-react';
+import { LayoutDashboard, Map, Truck, Briefcase, Zap, BrainCircuit, Bell, ShieldCheck, Cpu } from 'lucide-react';
 
 export function Sidebar({ activeTab, setActiveTab }) {
   const menuItems = [
@@ -13,54 +13,73 @@ export function Sidebar({ activeTab, setActiveTab }) {
   ];
 
   return (
-    <aside className="w-64 border-r border-[var(--border-glass)] bg-[var(--bg-card)] p-4 flex flex-col justify-between shrink-0">
-      <div className="space-y-1">
-        <div className="px-3 py-2 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-          Platform Navigation
+    <aside className="w-64 border-r border-slate-800/80 bg-[#0F172A]/90 p-4 flex flex-col justify-between shrink-0 select-none">
+      <div className="space-y-4">
+        {/* Brand Header */}
+        <div className="flex items-center gap-3 px-2 py-1">
+          <div className="p-2 rounded-xl bg-gradient-to-tr from-cyan-600 to-blue-600 shadow-lg shadow-cyan-500/20">
+            <Cpu className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h1 className="text-base font-bold text-white tracking-wider flex items-center gap-1">
+              UNIFLEET
+            </h1>
+            <p className="text-[10px] font-mono text-cyan-400 tracking-wider">UNIFIED FLEET INTELLIGENCE</p>
+          </div>
         </div>
 
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeTab === item.id;
+        <div className="h-px bg-slate-800/80 my-2" />
 
-          return (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                isActive
-                  ? 'bg-blue-600/20 text-blue-400 border border-blue-500/40 shadow-lg shadow-blue-500/10 font-semibold'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <Icon className={`w-4 h-4 ${isActive ? 'text-blue-400' : 'text-gray-400'}`} />
-                <span>{item.label}</span>
-              </div>
+        <div className="space-y-1">
+          <div className="px-3 py-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-widest font-mono">
+            OPERATIONAL NAVIGATION
+          </div>
 
-              {item.isHero && (
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-gradient-to-r from-blue-500 to-indigo-500 text-white uppercase shadow-sm">
-                  HERO
-                </span>
-              )}
-            </button>
-          );
-        })}
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
+                  isActive
+                    ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/40 shadow-lg shadow-cyan-500/10 font-bold'
+                    : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-cyan-400' : 'text-slate-400'}`} />
+                  <span>{item.label}</span>
+                </div>
+
+                {item.isHero && (
+                  <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                    HERO TWIN
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* System Status Footer Card */}
-      <div className="p-3 rounded-xl bg-gray-900/60 border border-gray-800 text-xs space-y-2">
-        <div className="flex items-center justify-between text-gray-400">
-          <span>Backend Brain:</span>
-          <span className="text-emerald-400 font-medium">FastAPI v1.0</span>
+      {/* System Architecture Status Footer */}
+      <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-[11px] space-y-2 font-mono">
+        <div className="flex items-center justify-between text-slate-400">
+          <span className="flex items-center gap-1.5">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Fleet Engine:
+          </span>
+          <span className="text-emerald-400 font-semibold">FastAPI v1.0</span>
         </div>
-        <div className="flex items-center justify-between text-gray-400">
-          <span>Broker:</span>
-          <span className="text-blue-400 font-medium">Mosquitto MQTT</span>
+        <div className="flex items-center justify-between text-slate-400">
+          <span>MQTT Broker:</span>
+          <span className="text-cyan-400 font-semibold">Mosquitto</span>
         </div>
-        <div className="flex items-center justify-between text-gray-400">
-          <span>Database:</span>
-          <span className="text-indigo-400 font-medium">PostgreSQL 15</span>
+        <div className="flex items-center justify-between text-slate-400">
+          <span>Primary DB:</span>
+          <span className="text-indigo-400 font-semibold">PostgreSQL</span>
         </div>
       </div>
     </aside>

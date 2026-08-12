@@ -1,112 +1,122 @@
 import React from 'react';
-import { Truck, Activity, Battery, Zap, AlertTriangle, ShieldCheck, ArrowUpRight } from 'lucide-react';
+import { Truck, Activity, Zap, ShieldCheck, ArrowUpRight } from 'lucide-react';
 
 export function OverviewPage({ fleetState, onNavigateTwin }) {
   const kpis = fleetState?.kpis || {};
-  const eventLogs = fleetState?.event_logs || [];
+  const eventLogs = fleetState?.events || fleetState?.event_logs || [];
   const robots = fleetState?.robots || [];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 bg-[#090D16] min-h-screen text-slate-100 font-sans select-none">
       {/* Top Welcome Banner */}
-      <div className="glass-panel p-6 flex items-center justify-between bg-gradient-to-r from-blue-950/40 via-gray-900/60 to-purple-950/40 border-blue-500/20">
+      <div className="glass-panel p-6 flex items-center justify-between bg-gradient-to-r from-cyan-950/30 via-slate-900/60 to-indigo-950/30 border-cyan-500/30">
         <div>
-          <h1 className="text-2xl font-bold text-white">Unified Fleet Operations Dashboard</h1>
-          <p className="text-sm text-gray-400 mt-1">Vendor-Agnostic AGV/AMR Fleet Orchestration • Synchronized Live Digital Twin</p>
+          <h1 className="text-xl font-bold text-white tracking-wider flex items-center gap-2">
+            UNIFLEET OPERATIONS CENTER
+            <span className="text-xs font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+              LIVE SYSTEM
+            </span>
+          </h1>
+          <p className="text-xs text-slate-400 mt-1 font-mono">
+            Vendor-Agnostic AGV/AMR Orchestration Platform • Real-Time Synchronized Telemetry
+          </p>
         </div>
         <button
           onClick={onNavigateTwin}
-          className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold flex items-center gap-2 shadow-lg shadow-blue-500/25 transition-all"
+          className="px-5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold font-mono flex items-center gap-2 shadow-lg shadow-cyan-500/20 transition-all"
         >
-          <span>Open Live Digital Twin</span>
+          <span>OPEN DIGITAL TWIN</span>
           <ArrowUpRight className="w-4 h-4" />
         </button>
       </div>
 
       {/* Metric Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="glass-panel p-5 space-y-2 border-l-4 border-l-blue-500">
-          <div className="flex items-center justify-between text-gray-400 text-xs">
-            <span>Total Fleet Size</span>
-            <Truck className="w-4 h-4 text-blue-400" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 font-mono">
+        <div className="glass-panel p-5 space-y-2 border-l-4 border-l-cyan-500 bg-slate-900/80">
+          <div className="flex items-center justify-between text-slate-400 text-xs">
+            <span>TOTAL FLEET SIZE</span>
+            <Truck className="w-4 h-4 text-cyan-400" />
           </div>
           <div className="text-3xl font-bold text-white">{kpis.total_robots || 5} AGVs</div>
-          <div className="text-xs text-blue-400 font-medium">3 Vendor Profiles Active</div>
+          <div className="text-xs text-cyan-400 font-semibold">3 Active Vendor Protocols</div>
         </div>
 
-        <div className="glass-panel p-5 space-y-2 border-l-4 border-l-emerald-500">
-          <div className="flex items-center justify-between text-gray-400 text-xs">
-            <span>Available Units</span>
+        <div className="glass-panel p-5 space-y-2 border-l-4 border-l-emerald-500 bg-slate-900/80">
+          <div className="flex items-center justify-between text-slate-400 text-xs">
+            <span>AVAILABLE UNITS</span>
             <Activity className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="text-3xl font-bold text-white">{kpis.available ?? 5}</div>
-          <div className="text-xs text-emerald-400 font-medium">Ready for job assignment</div>
+          <div className="text-xs text-emerald-400 font-semibold">Ready for Job Dispatch</div>
         </div>
 
-        <div className="glass-panel p-5 space-y-2 border-l-4 border-l-purple-500">
-          <div className="flex items-center justify-between text-gray-400 text-xs">
-            <span>Route Conflicts Resolved</span>
-            <ShieldCheck className="w-4 h-4 text-purple-400" />
+        <div className="glass-panel p-5 space-y-2 border-l-4 border-l-rose-500 bg-slate-900/80">
+          <div className="flex items-center justify-between text-slate-400 text-xs">
+            <span>CONFLICTS RESOLVED</span>
+            <ShieldCheck className="w-4 h-4 text-rose-400" />
           </div>
           <div className="text-3xl font-bold text-white">{kpis.predicted_conflicts_resolved ?? 0}</div>
-          <div className="text-xs text-purple-400 font-medium">Harmony Engine Priority Pass</div>
+          <div className="text-xs text-rose-400 font-semibold">Harmony Engine Auto-Pass</div>
         </div>
 
-        <div className="glass-panel p-5 space-y-2 border-l-4 border-l-amber-500">
-          <div className="flex items-center justify-between text-gray-400 text-xs">
-            <span>Active Transport Jobs</span>
-            <Zap className="w-4 h-4 text-amber-400" />
+        <div className="glass-panel p-5 space-y-2 border-l-4 border-l-indigo-500 bg-slate-900/80">
+          <div className="flex items-center justify-between text-slate-400 text-xs">
+            <span>ACTIVE TRANSPORT JOBS</span>
+            <Zap className="w-4 h-4 text-indigo-400" />
           </div>
           <div className="text-3xl font-bold text-white">{kpis.active_jobs ?? 0}</div>
-          <div className="text-xs text-amber-400 font-medium">{kpis.completed_jobs ?? 0} jobs completed</div>
+          <div className="text-xs text-indigo-400 font-semibold">{kpis.completed_jobs ?? 0} Jobs Completed</div>
         </div>
       </div>
 
       {/* Fleet Telemetry Status & Activity Stream */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Active AGVs Snapshot */}
-        <div className="lg:col-span-1 glass-panel p-5 space-y-4">
-          <h3 className="text-base font-bold text-white">Live AGV Fleet Telemetry</h3>
-          <div className="space-y-3">
-            {robots.map((r) => (
-              <div key={r.id} className="p-3 rounded-xl bg-gray-900/60 border border-gray-800 flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-white text-sm">{r.id}</span>
-                    <span className="text-[10px] text-gray-400 font-mono">({r.vendor})</span>
+        <div className="lg:col-span-1 glass-panel p-5 space-y-4 bg-slate-900/80">
+          <h3 className="text-sm font-bold text-white font-mono uppercase tracking-wider">Live AGV Telemetry</h3>
+          <div className="space-y-3 font-mono">
+            {robots.map((r) => {
+              const r_id = r.robot_id || r.id;
+              return (
+                <div key={r_id} className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-white text-xs">{r_id}</span>
+                      <span className="text-[10px] text-slate-400">({r.vendor})</span>
+                    </div>
+                    <div className="text-[11px] text-slate-400 mt-0.5">
+                      Way: {r.current_node} ({r.x.toFixed(1)}, {r.y.toFixed(1)})
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-400 mt-0.5 font-mono">
-                    Pos: ({r.x.toFixed(1)}, {r.y.toFixed(1)}) • {r.current_node}
+                  <div className="text-right">
+                    <span className="text-xs font-bold text-emerald-400">{Math.round(r.battery)}%</span>
+                    <div className="text-[10px] uppercase text-cyan-400">{r.status}</div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <span className="text-xs font-bold text-emerald-400">{Math.round(r.battery)}%</span>
-                  <div className="text-[10px] uppercase text-gray-400">{r.status}</div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
         {/* Real-time Event Stream */}
-        <div className="lg:col-span-2 glass-panel p-5 space-y-4">
-          <h3 className="text-base font-bold text-white">Real-Time Event Stream</h3>
-          <div className="space-y-2 max-h-[380px] overflow-y-auto">
+        <div className="lg:col-span-2 glass-panel p-5 space-y-4 bg-slate-900/80">
+          <h3 className="text-sm font-bold text-white font-mono uppercase tracking-wider">System Event Stream</h3>
+          <div className="space-y-2 max-h-[380px] overflow-y-auto font-mono">
             {eventLogs.length === 0 ? (
-              <div className="text-sm text-gray-500 py-8 text-center">No system events logged yet.</div>
+              <div className="text-xs text-slate-500 py-8 text-center">No system events logged yet.</div>
             ) : (
-              eventLogs.map((log) => (
-                <div key={log.id} className="p-3 rounded-xl bg-gray-900/50 border border-gray-800/80 flex items-start gap-3">
+              eventLogs.map((log, idx) => (
+                <div key={log.id || idx} className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 flex items-start gap-3 text-xs">
                   <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
                     log.severity === 'WARNING' ? 'bg-amber-400' :
-                    log.severity === 'SUCCESS' ? 'bg-emerald-400' : 'bg-blue-400'
-                  }`}></div>
-                  <div className="flex-1 text-xs space-y-0.5">
-                    <div className="flex items-center justify-between text-gray-400">
-                      <span className="font-mono font-semibold text-blue-300">{log.event_type}</span>
-                      <span className="text-[10px]">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                    log.severity === 'SUCCESS' ? 'bg-emerald-400' : 'bg-cyan-400'
+                  }`} />
+                  <div className="flex-1 space-y-0.5">
+                    <div className="flex items-center justify-between text-slate-400">
+                      <span className="font-bold text-cyan-300">{log.event_type || 'SYSTEM'}</span>
+                      <span className="text-[10px]">{log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : '12:00:00'}</span>
                     </div>
-                    <p className="text-gray-200">{log.message}</p>
+                    <p className="text-slate-200">{log.message}</p>
                   </div>
                 </div>
               ))
