@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
-import { Pause, Play, Square, Truck, Cpu, Battery, MapPin } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Pause, Play, Square, Truck, Cpu, Battery, Layers, X, Code2, Check } from 'lucide-react';
 import { api } from '../services/api';
 
-export function RobotsPage({ fleetState }) {
+export function RobotsPage({ fleetState, showAdaptersModal, onCloseAdaptersModal }) {
   const [vendorFilter, setVendorFilter] = useState('ALL');
+  const [localAdaptersModal, setLocalAdaptersModal] = useState(false);
   const robots = fleetState?.robots || [];
+
+  useEffect(() => {
+    if (showAdaptersModal) {
+      setLocalAdaptersModal(true);
+    }
+  }, [showAdaptersModal]);
 
   const filteredRobots = vendorFilter === 'ALL' 
     ? robots 
@@ -25,9 +32,16 @@ export function RobotsPage({ fleetState }) {
     return 'badge-vendor-gamma';
   };
 
+  const adaptersData = [
+    { vendor: "Vendor Alpha", protocol: "JSON over MQTT", topic: "fleet/alpha/telemetry", robot: "R01 / R02", schema: '{ "id": "R01", "battery_level": 95, "x_pos": 2.0, "y_pos": 3.0, "state": "READY" }' },
+    { vendor: "Vendor Beta", protocol: "JSON over MQTT", topic: "fleet/beta/telemetry", robot: "R03", schema: '{ "robotId": "R03", "soc": 95, "coordinates": {"x": 10, "y": 4}, "state": "AVAILABLE" }' },
+    { vendor: "Vendor Gamma", protocol: "JSON over MQTT", topic: "fleet/gamma/telemetry", robot: "R04 / R05", schema: '{ "dev_id": "R04", "b_lvl": 88, "location": {"px": 14, "py": 8}, "op_state": "MOVING" }' },
+    { vendor: "Vendor Delta", protocol: "Plug & Play Extension", topic: "fleet/delta/telemetry", robot: "Dynamic Extension", schema: '{ "device_guid": "R06", "charge_percent": 99, "geo_point": [18, 12], "system_mode": "ACTIVE" }' }
+  ];
+
   return (
-    <div className="p-6 space-y-6 bg-[#090D16] min-h-screen text-slate-100 font-sans select-none">
-      {/* Header & Filter */}
+    <div className="p-6 space-y-6 bg-[#090D16] min-h-screen text-slate-100 font-sans select-none relative">
+      {/* Header & Controls */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-white tracking-wider font-mono flex items-center gap-2">
@@ -41,21 +55,32 @@ export function RobotsPage({ fleetState }) {
           </p>
         </div>
 
-        {/* Vendor Filter Buttons */}
-        <div className="flex items-center gap-2 bg-slate-900/90 p-1.5 rounded-xl border border-slate-800 text-xs font-mono">
-          {['ALL', 'Vendor Alpha', 'Vendor Beta', 'Vendor Gamma', 'Vendor Delta'].map((v) => (
-            <button
-              key={v}
-              onClick={() => setVendorFilter(v)}
-              className={`px-3 py-1.5 rounded-lg transition-all font-semibold ${
-                vendorFilter === v
-                  ? 'bg-cyan-600 text-white shadow-md shadow-cyan-500/20'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              {v}
-            </button>
-          ))}
+        {/* Right Action Bar */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setLocalAdaptersModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/40 text-xs font-mono font-semibold hover:bg-purple-500/30 transition-all shadow-md shadow-purple-500/10"
+          >
+            <Layers className="w-3.5 h-3.5 text-purple-400" />
+            SHOW VENDOR ADAPTER SCHEMAS
+          </button>
+
+          {/* Vendor Filter Buttons */}
+          <div className="flex items-center gap-1.5 bg-slate-900/90 p-1.5 rounded-xl border border-slate-800 text-xs font-mono">
+            {['ALL', 'Vendor Alpha', 'Vendor Beta', 'Vendor Gamma', 'Vendor Delta'].map((v) => (
+              <button
+                key={v}
+                onClick={() => setVendorFilter(v)}
+                className={`px-2.5 py-1 rounded-lg transition-all font-semibold ${
+                  vendorFilter === v
+                    ? 'bg-cyan-600 text-white shadow-md shadow-cyan-500/20'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {v}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -128,6 +153,68 @@ export function RobotsPage({ fleetState }) {
           );
         })}
       </div>
+
+      {/* Act 6: Open Vendor Adapters Breakdown Modal */}
+      {localAdaptersModal && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-6">
+          <div className="bg-[#0F172A] border border-purple-500/50 rounded-2xl p-6 w-full max-w-4xl space-y-5 font-mono shadow-2xl shadow-purple-500/20">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <Code2 className="w-5 h-5 text-purple-400" />
+                <h3 className="text-base font-bold text-white tracking-wider">OPEN VENDOR ADAPTER SPECIFICATIONS (ACT 06)</h3>
+              </div>
+              <button
+                onClick={() => {
+                  setLocalAdaptersModal(false);
+                  if (onCloseAdaptersModal) onCloseAdaptersModal();
+                }}
+                className="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed font-sans">
+              UniFleet abstracts proprietary hardware protocols via plug-and-play python adapter classes. Adding a 4th manufacturer (such as <span className="font-mono text-purple-300 font-bold">Vendor Delta</span>) requires only inheriting from <code className="text-cyan-300">BaseVendorAdapter</code> without changing core Fleet Brain or Harmony Engine code.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {adaptersData.map((item) => (
+                <div key={item.vendor} className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-purple-300 text-sm">{item.vendor}</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      {item.protocol}
+                    </span>
+                  </div>
+
+                  <div className="text-[11px] text-slate-400 space-y-1">
+                    <div><span className="text-slate-500">Target AGVs:</span> {item.robot}</div>
+                    <div><span className="text-slate-500">MQTT Topic:</span> <code className="text-cyan-300">{item.topic}</code></div>
+                  </div>
+
+                  <div className="p-2.5 rounded bg-slate-900/90 border border-slate-800 text-[10px] text-slate-300 font-mono overflow-x-auto">
+                    <span className="text-slate-500 block text-[9px] mb-1">RAW PAYLOAD SCHEMA</span>
+                    {item.schema}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-end pt-2 border-t border-slate-800">
+              <button
+                onClick={() => {
+                  setLocalAdaptersModal(false);
+                  if (onCloseAdaptersModal) onCloseAdaptersModal();
+                }}
+                className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all"
+              >
+                Close Adapter Specifications
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

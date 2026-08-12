@@ -13,9 +13,11 @@ import { useFleetWebSocket } from './services/useFleetWebSocket';
 import { api } from './services/api';
 
 export function App() {
-  const [activeTab, setActiveTab] = useState('digital-twin'); // Digital Twin is hero centerpiece
+  const [activeTab, setActiveTab] = useState('digital-twin');
   const [isPresentationMode, setIsPresentationMode] = useState(false);
   const [topologyData, setTopologyData] = useState(null);
+  const [selectedRobotId, setSelectedRobotId] = useState(null);
+  const [showAdaptersModal, setShowAdaptersModal] = useState(false);
   const { fleetState, isConnected } = useFleetWebSocket();
 
   useEffect(() => {
@@ -30,14 +32,50 @@ export function App() {
     fetchTopology();
   }, []);
 
+  const handleActTriggered = (actNum) => {
+    if (actNum === 1) {
+      setActiveTab('robots');
+      setSelectedRobotId(null);
+    } else if (actNum === 2) {
+      setActiveTab('digital-twin');
+      setSelectedRobotId('R03'); // Auto-select R03 in Digital Twin for inspection
+    } else if (actNum === 3) {
+      setActiveTab('jobs');
+    } else if (actNum === 4) {
+      setActiveTab('digital-twin');
+    } else if (actNum === 5) {
+      setActiveTab('workflows');
+    } else if (actNum === 6) {
+      setActiveTab('robots');
+      setShowAdaptersModal(true); // Pop up Open Adapters Schema Modal
+    } else if (actNum === 'reset') {
+      setActiveTab('digital-twin');
+      setSelectedRobotId(null);
+      setShowAdaptersModal(false);
+    }
+  };
+
   const renderActivePage = () => {
     switch (activeTab) {
       case 'overview':
         return <OverviewPage fleetState={fleetState} onNavigateTwin={() => setActiveTab('digital-twin')} />;
       case 'digital-twin':
-        return <DigitalTwinPage fleetState={fleetState} topologyData={topologyData} />;
+        return (
+          <DigitalTwinPage 
+            fleetState={fleetState} 
+            topologyData={topologyData}
+            selectedRobotId={selectedRobotId}
+            setSelectedRobotId={setSelectedRobotId}
+          />
+        );
       case 'robots':
-        return <RobotsPage fleetState={fleetState} />;
+        return (
+          <RobotsPage 
+            fleetState={fleetState}
+            showAdaptersModal={showAdaptersModal}
+            onCloseAdaptersModal={() => setShowAdaptersModal(false)}
+          />
+        );
       case 'jobs':
         return <JobsPage fleetState={fleetState} />;
       case 'workflows':
@@ -47,7 +85,14 @@ export function App() {
       case 'events':
         return <EventsPage fleetState={fleetState} />;
       default:
-        return <DigitalTwinPage fleetState={fleetState} topologyData={topologyData} />;
+        return (
+          <DigitalTwinPage 
+            fleetState={fleetState} 
+            topologyData={topologyData}
+            selectedRobotId={selectedRobotId}
+            setSelectedRobotId={setSelectedRobotId}
+          />
+        );
     }
   };
 
@@ -75,7 +120,7 @@ export function App() {
       </div>
 
       {/* Floating Guided Demo Command Center */}
-      <DemoController onActTriggered={() => setActiveTab('digital-twin')} />
+      <DemoController onActTriggered={handleActTriggered} />
     </div>
   );
 }

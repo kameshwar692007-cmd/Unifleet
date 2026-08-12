@@ -1,17 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { WarehouseCanvas } from '../components/DigitalTwin/WarehouseCanvas';
 import { RobotInspector } from '../components/DigitalTwin/RobotInspector';
 import { Activity, ShieldCheck } from 'lucide-react';
 
-export function DigitalTwinPage({ fleetState, topologyData }) {
-  const [selectedRobotId, setSelectedRobotId] = useState(null);
+export function DigitalTwinPage({ fleetState, topologyData, selectedRobotId, setSelectedRobotId }) {
   const robots = fleetState?.robots || [];
   const events = fleetState?.events || [];
 
   const selectedRobot = robots.find(r => (r.robot_id || r.id) === selectedRobotId);
 
   return (
-    <div className="p-5 h-[calc(100vh-3.5rem)] flex gap-5 overflow-hidden bg-[#090D16]">
+    <div className="p-5 h-[calc(100vh-3.5rem)] flex gap-5 overflow-hidden bg-[#090D16] select-none">
       {/* 2D SVG Digital Twin Canvas + Live Event Stream */}
       <div className="flex-1 flex flex-col justify-between space-y-4 min-w-0">
         <div className="flex-1 min-h-0">
@@ -19,7 +18,7 @@ export function DigitalTwinPage({ fleetState, topologyData }) {
             fleetState={fleetState}
             topologyData={topologyData}
             selectedRobotId={selectedRobotId}
-            onSelectRobot={(id) => setSelectedRobotId(id)}
+            onSelectRobot={(id) => setSelectedRobotId && setSelectedRobotId(id)}
           />
         </div>
 
@@ -56,7 +55,7 @@ export function DigitalTwinPage({ fleetState, topologyData }) {
       {selectedRobot && (
         <RobotInspector
           robot={selectedRobot}
-          onClose={() => setSelectedRobotId(null)}
+          onClose={() => setSelectedRobotId && setSelectedRobotId(null)}
         />
       )}
     </div>
